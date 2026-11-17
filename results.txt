@@ -1,0 +1,79 @@
+
+-- Q1. Headline KPIs
+orders | net_revenue | avg_order_value | return_rate_pct
+2764 | 9988044 | 3831 | 5.7
+
+-- Q2. Monthly revenue trend (returns excluded)
+month | revenue
+2025-11 | 1446061
+2025-12 | 713625
+2026-01 | 658743
+2026-02 | 664544
+2026-03 | 1076324
+2026-04 | 712701
+2026-05 | 607548
+2026-06 | 646478
+2026-07 | 701474
+2026-08 | 675148
+2026-09 | 707945
+2026-10 | 1377454
+
+-- Q3. Revenue and share by category
+category | revenue | share_pct
+Lehenga | 3583402 | 35.9
+Saree | 2462889 | 24.7
+Jacket | 1262789 | 12.6
+Dupatta | 906508 | 9.1
+Kurta | 784061 | 7.8
+Shirt | 638195 | 6.4
+Bottoms | 350199 | 3.5
+
+-- Q4. Channel performance
+channel | orders | revenue | avg_order_value
+Instagram | 1185 | 4613642 | 3893
+Website | 637 | 2419577 | 3798
+Exhibition | 395 | 1508932 | 3820
+WhatsApp | 390 | 1445892 | 3707
+
+-- Q5. Top 3 products per month (window function)
+month | product_name | revenue | rnk
+2025-11 | Festive Lehenga Set | 597984 | 1
+2025-11 | Modal Silk Saree | 367739 | 2
+2025-11 | Indo-Western Jacket | 160254 | 3
+2025-12 | Modal Silk Saree | 223163 | 1
+2025-12 | Festive Lehenga Set | 202478 | 2
+2025-12 | Indo-Western Jacket | 94648 | 3
+2026-01 | Festive Lehenga Set | 241623 | 1
+2026-01 | Modal Silk Saree | 142476 | 2
+2026-01 | Indo-Western Jacket | 76628 | 3
+2026-02 | Modal Silk Saree | 195867 | 1
+2026-02 | Festive Lehenga Set | 188079 | 2
+2026-02 | Indo-Western Jacket | 93248 | 3
+... (36 rows)
+
+-- Q6. Revenue by city
+city | customers | revenue
+Delhi | 192 | 1643649
+Jaipur | 184 | 1562893
+Pune | 169 | 1456404
+Mumbai | 180 | 1454293
+Ahmedabad | 172 | 1320916
+Surat | 188 | 1317562
+Bengaluru | 173 | 1232326
+
+-- Q7. Repeat customers: how many customers ordered more than once
+bucket | customers
+1 order | 446
+2-3 orders | 687
+4+ orders | 151
+
+-- Q8. Return rate by product (quality check)
+product_name | orders | return_rate_pct
+Block Print Shirt | 347 | 8.4
+Ajrakh Kurta | 293 | 7.2
+Modal Silk Saree | 376 | 6.4
+Cotton Palazzo | 320 | 5.9
+Indo-Western Jacket | 326 | 5.8
+Festive Lehenga Set | 368 | 4.6
+Bandhani Dupatta | 389 | 4.1
+Ajrakh Stole | 345 | 3.5

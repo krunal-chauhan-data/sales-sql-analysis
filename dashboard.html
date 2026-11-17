@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sales Analysis Dashboard — Apparel Brand (Sample Data)</title>
+<style>
+:root{--bg:#f7f6f3;--card:#fff;--ink:#1f2328;--mute:#6b7076;--line:#e6e3dd;--a:#2f6f6a;--b:#c98a3c;--bad:#b4473b}
+@media(prefers-color-scheme:dark){:root{--bg:#16181b;--card:#1f2226;--ink:#eceae6;--mute:#9aa0a6;--line:#30343a;--a:#5fb3aa;--b:#e0a95c;--bad:#e07a6e}}
+*{box-sizing:border-box}body{margin:0;font:15px/1.45 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;background:var(--bg);color:var(--ink)}
+.wrap{max-width:1100px;margin:auto;padding:24px 16px 48px}
+h1{font-size:24px;margin:0 0 4px}.sub{color:var(--mute);margin:0 0 6px}
+.note{display:inline-block;font-size:12px;background:var(--card);border:1px solid var(--line);border-radius:6px;padding:4px 8px;color:var(--mute);margin-bottom:20px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:16px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px}
+.kpi .v{font-size:26px;font-weight:650;letter-spacing:-.5px}.kpi .l{color:var(--mute);font-size:13px}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:12px}
+.card h2{font-size:15px;margin:0 0 2px}.card p{margin:0 0 10px;color:var(--mute);font-size:13px}
+.full{grid-column:1/-1}svg{width:100%;height:auto;display:block}
+svg text{fill:var(--mute);font-size:11px}svg .val{fill:var(--ink);font-weight:600}
+footer{margin-top:24px;color:var(--mute);font-size:13px}
+</style></head><body><div class="wrap">
+<h1>Sales Analysis Dashboard</h1>
+<p class="sub">12 months of orders for an Indian handcrafted apparel brand (Nov 2025 – Oct 2026). Built with SQL (SQLite) + Python.</p>
+<span class="note">Sample data: every figure is randomly generated for portfolio purposes.</span>
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+ <div class="card full"><h2>Monthly net revenue (₹)</h2><p id="trendNote"></p><div id="trend"></div></div>
+ <div class="card"><h2>Revenue by category</h2><p>Lehengas and sarees drive most revenue.</p><div id="cat"></div></div>
+ <div class="card"><h2>Revenue by sales channel</h2><p>Instagram brings in about 46% of revenue.</p><div id="chan"></div></div>
+ <div class="card"><h2>Revenue by city</h2><p>Revenue is spread evenly across cities.</p><div id="city"></div></div>
+ <div class="card"><h2>Return rate by product (%)</h2><p>Flags products that may have quality or sizing issues.</p><div id="ret"></div></div>
+ <div class="card"><h2>Customers by number of orders</h2><p id="repNote"></p><div id="rep"></div></div>
+</div>
+<footer>Queries: Q1–Q8 in <code>queries.sql</code>. Revenue = price × qty × (1 − discount), returned orders excluded.</footer>
+</div>
+<script>
+const D={"kpi": [2764, 9988044.0, 3831.0, 5.7], "monthly": [["2025-11", 1446061.0], ["2025-12", 713625.0], ["2026-01", 658743.0], ["2026-02", 664544.0], ["2026-03", 1076324.0], ["2026-04", 712701.0], ["2026-05", 607548.0], ["2026-06", 646478.0], ["2026-07", 701474.0], ["2026-08", 675148.0], ["2026-09", 707945.0], ["2026-10", 1377454.0]], "category": [["Lehenga", 3583402.0, 35.9], ["Saree", 2462889.0, 24.7], ["Jacket", 1262789.0, 12.6], ["Dupatta", 906508.0, 9.1], ["Kurta", 784061.0, 7.8], ["Shirt", 638195.0, 6.4], ["Bottoms", 350199.0, 3.5]], "channel": [["Instagram", 1185, 4613642.0, 3893.0], ["Website", 637, 2419577.0, 3798.0], ["Exhibition", 395, 1508932.0, 3820.0], ["WhatsApp", 390, 1445892.0, 3707.0]], "city": [["Delhi", 192, 1643649.0], ["Jaipur", 184, 1562893.0], ["Pune", 169, 1456404.0], ["Mumbai", 180, 1454293.0], ["Ahmedabad", 172, 1320916.0], ["Surat", 188, 1317562.0], ["Bengaluru", 173, 1232326.0]], "repeat": [["1 order", 446], ["2-3 orders", 687], ["4+ orders", 151]], "returns": [["Block Print Shirt", 347, 8.4], ["Ajrakh Kurta", 293, 7.2], ["Modal Silk Saree", 376, 6.4], ["Cotton Palazzo", 320, 5.9], ["Indo-Western Jacket", 326, 5.8], ["Festive Lehenga Set", 368, 4.6], ["Bandhani Dupatta", 389, 4.1], ["Ajrakh Stole", 345, 3.5]]};
+const inr=v=>v>=1e7?'₹'+(v/1e7).toFixed(2)+' Cr':v>=1e5?'₹'+(v/1e5).toFixed(1)+' L':'₹'+Math.round(v).toLocaleString('en-IN');
+const css=n=>getComputedStyle(document.documentElement).getPropertyValue(n).trim();
+const [orders,rev,aov,rr]=D.kpi;
+document.getElementById('kpis').innerHTML=[[inr(rev),'Net revenue'],[orders.toLocaleString('en-IN'),'Orders'],[inr(aov),'Avg order value'],[rr+'%','Return rate']]
+ .map(([v,l])=>`<div class="card kpi"><div class="v">${v}</div><div class="l">${l}</div></div>`).join('');
+function hbar(el,rows,fmt,color){
+ const W=460,rh=28,L=130,H=rows.length*rh+4,max=Math.max(...rows.map(r=>r[1]));
+ let s=`<svg viewBox="0 0 ${W} ${H}">`;
+ rows.forEach((r,i)=>{const w=(W-L-70)*r[1]/max,y=i*rh+4;
+  s+=`<text x="${L-8}" y="${y+15}" text-anchor="end">${r[0]}</text><rect x="${L}" y="${y+3}" width="${w}" height="16" rx="3" fill="${color||css('--a')}"/><text class="val" x="${L+w+6}" y="${y+15}">${fmt(r[1])}</text>`});
+ document.getElementById(el).innerHTML=s+'</svg>';
+}
+// trend line
+(function(){
+ const m=D.monthly,W=1000,H=260,P={l:60,r:20,t:20,b:30},max=Math.ceil(Math.max(...m.map(r=>r[1]))/2e5)*2e5;
+ const x=i=>P.l+i*(W-P.l-P.r)/(m.length-1),y=v=>H-P.b-(v/max)*(H-P.t-P.b);
+ const mon=s=>new Date(s+'-01').toLocaleString('en',{month:'short'})+(s.endsWith('-01')||s.endsWith('-11')&&s.startsWith('2025')?" '"+s.slice(2,4):'');
+ let s=`<svg viewBox="0 0 ${W} ${H}">`;
+ for(let g=0;g<=max;g+=max/4){s+=`<line x1="${P.l}" x2="${W-P.r}" y1="${y(g)}" y2="${y(g)}" stroke="${css('--line')}"/><text x="${P.l-8}" y="${y(g)+4}" text-anchor="end">${inr(g)}</text>`}
+ s+=`<polyline fill="none" stroke="${css('--a')}" stroke-width="2.5" points="${m.map((r,i)=>x(i)+','+y(r[1])).join(' ')}"/>`;
+ m.forEach((r,i)=>{s+=`<circle cx="${x(i)}" cy="${y(r[1])}" r="3.5" fill="${css('--a')}"><title>${r[0]}: ${inr(r[1])}</title></circle><text x="${x(i)}" y="${H-8}" text-anchor="middle">${mon(r[0])}</text>`});
+ const top=[...m].sort((a,b)=>b[1]-a[1]).slice(0,2);
+ top.forEach(r=>{const i=m.indexOf(r);s+=`<text class="val" x="${x(i)}" y="${y(r[1])-10}" text-anchor="middle">${inr(r[1])}</text>`});
+ document.getElementById('trend').innerHTML=s+'</svg>';
+ const low=[...m].sort((a,b)=>a[1]-b[1])[0];
+ document.getElementById('trendNote').textContent=`Festive months (Oct–Nov) bring about 2× the revenue of a normal month; the low point was ${mon(low[0])} at ${inr(low[1])}.`;
+})();
+hbar('cat',D.category.map(r=>[r[0],r[1]]),inr);
+hbar('chan',D.channel.map(r=>[r[0],r[2]]),inr);
+hbar('city',D.city.map(r=>[r[0],r[2]]),inr);
+hbar('ret',D.returns.map(r=>[r[0],r[2]]),v=>v+'%',null);
+hbar('rep',D.repeat,v=>v.toLocaleString('en-IN'),css('--b'));
+const tot=D.repeat.reduce((a,r)=>a+r[1],0),rep=tot-D.repeat[0][1];
+document.getElementById('repNote').textContent=`${Math.round(100*rep/tot)}% of customers ordered more than once.`;
+// highlight the worst return rate
+document.querySelector('#ret rect').setAttribute('fill',css('--bad'));
+</script></body></html>
